@@ -17,10 +17,10 @@ image_arr = np.flipud(image_arr)
 map_grid = np.float32(image_arr)
 map_grid = map_grid[::step, ::step]
 map_grid1 = np.copy(map_grid)
-# 计算用
+
 map_grid[map_grid <= 100] = 0
 map_grid[map_grid > 100] = 10
-# # 绘图用
+
 map_grid1[map_grid1 <= 60] = 0
 map_grid1[map_grid1 > 60] = 10
 # -------------------
@@ -46,35 +46,12 @@ class modifiedAStar(object):
         self.best_path_array = numpy.array([[], []])  # 回溯路径表
 
     def h_value_tem(self, son_p):
-        """
-        计算拓展节点和终点的h值
-        :param son_p:子搜索节点坐标
-        :return:
-        """
         h = (son_p[0] - self.goal[0]) ** 2 + (son_p[1] - self.goal[1]) ** 2
         h = numpy.sqrt(h)  # 计算h
         return h
 
-    # def g_value_tem(self, son_p, father_p):
-    #     """
-    #     计算拓展节点和父节点的g值
-    #     其实也可以直接用1或者1.414代替
-    #     :param son_p:子节点坐标
-    #     :param father_p:父节点坐标，也就是self.current_point
-    #     :return:返回子节点到父节点的g值，但不是全局g值
-    #     """
-    #     g1 = father_p[0] - son_p[0]
-    #     g2 = father_p[1] - son_p[1]
-    #     g = g1 ** 2 + g2 ** 2
-    #     g = numpy.sqrt(g)
-    #     return g
-
-
     def g_accumulation(self, son_point, father_point):
-        """
-        累计的g值
-        :return:
-        """
+
         g1 = father_point[0] - son_point[0]
         g2 = father_point[1] - son_point[1]
 
@@ -84,43 +61,29 @@ class modifiedAStar(object):
         return g
 
     def f_value_tem(self, son_p, father_p):
-        """
-        求出的是临时g值和h值加上累计g值得到全局f值
-        :param father_p: 父节点坐标
-        :param son_p: 子节点坐标
-        :return:f
-        """
         f = self.g_accumulation(son_p, father_p) + self.h_value_tem(son_p)
         return f
 
     def child_point(self, x):
-        """
-        拓展的子节点坐标
-        :param x: 父节点坐标
-        :return: 子节点存入open表，返回值是每一次拓展出的子节点数目，用于撞墙判断
-        当搜索的节点撞墙后，如果不加处理，会陷入死循环
-        """
-        # 开始遍历周围8个节点
         for j in range(-1, 2, 1):
             for q in range(-1, 2, 1):
 
                 if j == 0 and q == 0:  # 搜索到父节点去掉
                     continue
                 m = [x[0] + j, x[1] + q]
-                # print(m)
-                # 注意！此处若想换为带有经纬度的地图寻路，得修改判断条件
-                if m[0] < 0 or m[0] > map_lon or m[1] < 0 or m[1] > map_lat:  # 搜索点出了边界去掉
+              
+                if m[0] < 0 or m[0] > map_lon or m[1] < 0 or m[1] > map_lat: 
                     continue
 
-                if map_grid[int(m[0]), int(m[1])] == 0:  # 搜索到障碍物去掉
+                if map_grid[int(m[0]), int(m[1])] == 0:  
                     continue
-                # m，x分别代表子节点和父节点
+
                 record_g = self.g_accumulation(m, x)
-                record_f = self.f_value_tem(m, x)  # 计算每一个节点的f值
+                record_f = self.f_value_tem(m, x)  
 
-                x_direction, y_direction = self.direction(x, m)  # 每产生一个子节点，记录一次方向
+                x_direction, y_direction = self.direction(x, m)  
 
-                para = [m[0], m[1], x_direction, y_direction, record_g, record_f]  # 将参数汇总一下
+                para = [m[0], m[1], x_direction, y_direction, record_g, record_f]  
 
                 a, index = self.judge_location(m, self.open)
                 if a == 1:
@@ -192,10 +155,6 @@ class modifiedAStar(object):
         # return best_path_array
 
     def main(self):
-        """
-        main函数
-        :return:
-        """
         best = self.start 
         h0 = self.h_value_tem(best)
         init_open = [best[0], best[1], 0, 0, 0, h0] 
@@ -204,27 +163,24 @@ class modifiedAStar(object):
         ite = 1 
         while ite <= 100000000000000000000000.00000:
 
-            # open列表为空，退出
             if self.open.shape[1] == 0:
                 print('没有')
                 return
 
             self.open = self.open.T[numpy.lexsort(self.open)].T 
 
-            # 选取open表中最小f值的节点作为best，放入closed表
 
             best = self.open[:, 0]
-            # print('检验第%s次当前点坐标*******************' % ite)
-            # print(best)
+
             self.closed = numpy.c_[self.closed, best]
 
-            if best[0] == end_a and best[1] == end_b:  # 如果best是目标点，退出
+            if best[0] == end_a and best[1] == end_b:  
                 print('有了')
                 return
 
-            self.child_point(best)  # 生成子节点并判断数目
+            self.child_point(best)  
             # print(self.open)
-            self.open = numpy.delete(self.open, 0, axis=1)  # 删除open中最优点
+            self.open = numpy.delete(self.open, 0, axis=1)  
 
             # print(self.open)
 
