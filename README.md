@@ -1,5 +1,5 @@
 # PCI-Assistance
-Source Code of Enhancing Percutaneous Coronary Intervention with Heuristic Path Planning and Deep-Learning-based Vascular Segmentation
+Source Code of **Enhancing Percutaneous Coronary Intervention with Heuristic Path Planning and Deep-Learning-based Vascular Segmentation**
 
 If you are interested in our work and find it is helpful, please cite
 
